@@ -1,0 +1,372 @@
+{
+  "name": "RAG Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        60,
+        80
+      ],
+      "id": "13e510a4-9b68-4aa9-9722-cd4641563274",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "support",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        80
+      ],
+      "id": "8b8603dd-3210-4a0b-9fc0-5301f7c3df05",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "NJ4bJGOhGoFRbHD1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $json.title }}"
+              },
+              {
+                "name": "content",
+                "value": "={{ $json.content }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        200,
+        320
+      ],
+      "id": "1362e35e-9b76-46b8-b869-dcee69151525",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "content": "## Populate Qdrant Collection",
+        "height": 660,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "daeb5cf8-6289-400c-a533-97c2c08b617e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a support agent for an online shop.  Only use the information available in the tools provided. Do not use any other information and if asked for information not available in these tools, inform the user that you cannot help them further and that they should send an email to support@shop.com."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        80
+      ],
+      "id": "1c4cfaf6-b373-4685-952c-14f7a499e101",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1020,
+        80
+      ],
+      "id": "1eede6bd-b220-487f-9406-65a73bcee79b",
+      "name": "When chat message received",
+      "webhookId": "70c866f8-1a00-47df-98a8-70b035e81387"
+    },
+    {
+      "parameters": {
+        "content": "## Chat with RAG Agent using data from Qdrant Collection",
+        "height": 660,
+        "width": 660,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        940,
+        0
+      ],
+      "id": "6e71f4d7-da19-4f68-b0f0-a3fe542a4640",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "support",
+        "toolDescription": "Call this tool to get data from the support database",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "support",
+          "mode": "list",
+          "cachedResultName": "support"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.2,
+      "position": [
+        1320,
+        320
+      ],
+      "id": "9d0b0a4b-9f96-4fe9-9e3c-91727330461f",
+      "name": "Qdrant Vector Store2",
+      "credentials": {
+        "qdrantApi": {
+          "id": "NJ4bJGOhGoFRbHD1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        220,
+        500
+      ],
+      "id": "bcb11236-fcc7-4d8b-8bce-de0cbd097ffc",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1180,
+        320
+      ],
+      "id": "30683d51-8246-411e-9a7a-f01baacac1a3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1000,
+        320
+      ],
+      "id": "06206fa9-3fce-4a94-a235-241a9320b937",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "SmFWGNpvKgH3R6Jw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        540
+      ],
+      "id": "1e4284ab-c554-4b35-bcf0-8a9348b45a50",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "SmFWGNpvKgH3R6Jw",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "article_id": "SHP-001",
+          "title": "Understanding Shipping Delays & Tracking Your Order",
+          "content": "Subject: Addressing Shipping Delays – We're Here to Help!\n\nWe understand that receiving your order promptly is a top priority, and we sincerely apologize if you’ve experienced any delays.  Shipping delays can unfortunately occur due to a variety of factors beyond our direct control, including high order volumes during peak seasons (like holidays), inclement weather impacting carrier routes, or unforeseen logistical issues with our shipping partners – primarily FedEx, UPS, and USPS. We work diligently to mitigate these risks by utilizing multiple carriers and maintaining strong relationships with them.\n\n**What You Can Do:**\n\n1. **Track Your Order:** The most important step is to regularly check the tracking information provided in your order confirmation email. This link will take you directly to the carrier's website where you can see the latest updates on your package’s location and estimated delivery date.  Please note that tracking information may not always be updated instantaneously; delays in updates don't necessarily reflect a problem with your shipment.\n\n2. **Contact Us Immediately:** If your tracking information hasn't been updated for more than 48 hours, or if it indicates a significant delay beyond the estimated delivery date, please contact us immediately through our website’s live chat feature, by replying to this email, or calling our customer support line at [Phone Number].  Providing your order number will expedite the process.\n\n3. **Carrier Communication:** While we handle the initial shipping arrangements, you can also directly contact the carrier (FedEx, UPS, or USPS) using the tracking number provided on their website for more detailed information. However, please allow us to investigate first as we often have direct communication with the carriers regarding potential issues.\n\n4. **Potential Causes & Our Investigation:**  When you contact us, we’ll immediately initiate an investigation with our shipping partners. This typically involves verifying the package's location, confirming delivery attempts, and identifying any potential bottlenecks in the shipment process. We will keep you updated on the progress of this investigation every 24-48 hours.\n\nWe appreciate your patience and understanding as we work to get your order to you safely and efficiently.  We are committed to providing excellent service and resolving any shipping issues promptly."
+        }
+      },
+      {
+        "json": {
+          "article_id": "RET-002",
+          "title": "Returning Items – Our Hassle-Free Return Policy",
+          "content": "Subject: Returning Your Purchase - Simple & Easy!\n\nWe want you to be completely satisfied with your purchase from [Shop Name]. If, for any reason, you’re not happy with an item, we offer a hassle-free return policy.  Our goal is to make the return process as smooth and convenient as possible.\n\n**Here's How It Works:**\n\n1. **Initiate Your Return:** Log into your account on our website and navigate to ‘My Orders’. Select the order containing the item you wish to return, then click ‘Request Return’. You’ll be prompted to select the reason for your return (e.g., incorrect size, damaged product, simply not desired) and upload a photo of the item if it's damaged or defective.  This helps us understand the issue and improve our service.\n\n2. **Return Shipping:** We provide you with a prepaid shipping label to print and affix to your return package. You are responsible for packaging the item securely to prevent damage during transit. Please ensure the original packaging is included if possible.\n\n3. **Ship Your Return:** Drop off your packaged return at any authorized [Shipping Carrier - e.g., USPS, UPS] location.  Be sure to retain tracking information for your shipment.\n\n4. **Processing Your Refund:** Once we receive and inspect the returned item (typically within 5-7 business days), we will process your refund. Refunds are issued back to the original payment method used during purchase. You’ll receive an email notification once the refund has been processed.\n\n**Important Notes:**\n*   Items must be returned within 30 days of delivery.\n*   The item must be unused, unworn (if applicable), and in its original packaging with all tags attached.\n*   Certain items are non-returnable (e.g., personalized goods, swimwear).  This information is clearly stated on the product page.\n\nFor any questions regarding our return policy, please don’t hesitate to contact us."
+        }
+      },
+      {
+        "json": {
+          "article_id": "PROD-003",
+          "title": "Product Questions & Specifications – Get the Details You Need",
+          "content": "Subject:  Detailed Product Information - We're Here to Answer Your Questions!\n\nAt [Shop Name], we’re committed to providing you with accurate and comprehensive information about all of our products. If you have any questions regarding a specific item, its features, materials, dimensions, or compatibility, we’re here to help.\n\n**Where to Find Information:**\n\n1. **Product Pages:** The most detailed information is always found on the individual product pages on our website. These pages include:\n    *   High-resolution images from multiple angles.\n    *   A comprehensive description of the product’s features and benefits.\n    *   Detailed specifications (e.g., dimensions, weight, materials, power requirements).\n    *   Customer reviews and ratings – read what other customers are saying!\n\n2. **FAQ Section:** We have a dedicated FAQ section on our website that addresses common questions about our products and services: [Link to FAQ]\n\n3. **Contact Us Directly:** If you can’t find the answer to your question on our website, please don't hesitate to contact us through our live chat feature, by replying to this email, or calling our customer support line at [Phone Number].  Please provide as much detail as possible about your query, including the product name and any specific aspects you’re interested in.\n\n**Example Questions We Can Answer:**\n*   What materials is this item made from?\n*   What are the dimensions of this product?\n*   Is this compatible with [Specific Device/Software]?\n*   What is the warranty on this product?\n*   Can you provide a size chart for clothing items?\n\nWe strive to answer all inquiries promptly and thoroughly.  Thank you for choosing [Shop Name]!"
+        }
+      },
+      {
+        "json": {
+          "article_id": "ACC-004",
+          "title": "Account Management – Managing Your [Shop Name] Account",
+          "content": "Subject: Manage Your Account - Easy Updates & Security\n\nMaintaining an accurate and up-to-date account is crucial for a seamless shopping experience with [Shop Name]. This article outlines how to manage your account settings, update your information, and ensure the security of your personal details.\n\n**Key Features:**\n\n1. **Login:** Log in to your account at [Link to Login Page] using your email address and password.\n\n2. **Profile Information:** You can update your profile information, including:\n    *   Name & Address (Billing & Shipping)\n    *   Email Address\n    *   Phone Number\n    *   Password – Change your password regularly for security reasons.\n\n3. **Order History:** View a complete record of all your past orders, including order details, tracking information, and payment history.\n\n4. **Saved Payment Methods:** Securely store your preferred payment methods (credit/debit cards) for faster checkout. You can add or remove payment methods at any time.\n\n5. **Notifications:** Manage your notification preferences – choose to receive email updates about order status, promotions, and account activity.\n\n6. **Security:** We take the security of your information very seriously.  We use [Mention Security Measures - e.g., SSL encryption] to protect your data during transmission.  Be sure to create a strong password (at least 12 characters with a mix of uppercase, lowercase letters, numbers, and symbols) and never share your login credentials.\n\n**Forgot Password?** If you’ve forgotten your password, click the ‘Forgot Password?’ link on the login page and follow the instructions to reset it.  We will send an email to the registered email address with a secure link to create a new password.\n\nIf you have any difficulties managing your account or require assistance, please contact our customer support team."
+        }
+      },
+      {
+        "json": {
+          "article_id": "PAY-005",
+          "title": "Payment Issues – Troubleshooting Payment Problems",
+          "content": "Subject:  Troubleshooting Payment Issues - We'll Get You Paid!\n\nWe accept a variety of payment methods to ensure you have convenient options for purchasing your items from [Shop Name]. However, occasionally issues can arise during the payment process. This article outlines common payment problems and how we can help resolve them.\n\n**Common Payment Issues & Solutions:**\n\n1. **Declined Transactions:** A declined transaction typically occurs due to insufficient funds, an incorrect card number, expired credit cards, or security restrictions imposed by your bank.  Double-check the information you entered during checkout – ensure all details (card number, expiry date, CVV code) are accurate.\n\n2. **Error Messages:** If you encounter an error message during payment processing, please note the exact wording of the error and contact us immediately. This will help us diagnose the problem quickly.\n\n3. **Payment Gateway Issues:** Occasionally, there may be temporary issues with our payment gateway (e.g., Stripe or PayPal). These issues are usually resolved within a few hours. We’ll notify you via email if there's a known outage.\n\n4. **Fraudulent Activity:** If you suspect fraudulent activity on your account, please contact us immediately.  We will investigate the matter thoroughly and take appropriate action to protect your account.\n\n**What To Do If You Encounter a Payment Problem:**\n\n1. **Double-Check Your Information:** As mentioned above, verify all payment details carefully.\n2. **Try a Different Payment Method:** If possible, try using a different credit card or PayPal account.\n3. **Contact Us Immediately:**  The fastest way to resolve a payment issue is to contact our customer support team through our website’s live chat feature, by replying to this email, or calling our customer support line at [Phone Number]. Please provide your order number and details about the error you encountered."
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6a1ae594-7c4b-4b36-8448-8ac6e9c67075",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c7cca511861abe7d6c22b5c01232c469580b6b16b6ee0cd3c8d86147e1c16879"
+  },
+  "id": "I33agLmP5dzRpzod",
+  "tags": []
+}

@@ -1,0 +1,70 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    env_file:
+      - .env
+    entrypoint: ["sh", "-c", "/opt/n8n/entrypoint.sh"]
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - n8n:/home/node/.n8n
+      - ./n8n:/opt/n8n
+    networks:
+      - network
+    depends_on:
+      - postgres
+  ollama:
+    image: ollama/ollama:latest
+    env_file:
+      - .env
+    ports:
+      - ${OLLAMA_PORT:-11434}:11434
+    volumes:
+      - ollama:/root/.ollama
+      - ./ollama/entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]
+    networks:
+      - network
+    # Make Nvidia GPU available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all 
+              capabilities: [gpu]
+  postgres:
+    image: postgres:17-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "${DB_POSTGRESDB_PORT:-5432}:5432"
+    networks:
+      - network
+  qdrant:
+    image: qdrant/qdrant:gpu-nvidia-latest
+    env_file:
+      - .env
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    networks:
+      - network
+    volumes:
+      - qdrant:/qdrant/storage
+    # Make Nvidia GPU available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all 
+              capabilities: [gpu]
+networks:
+  network:
+volumes:
+  n8n:
+  ollama:
+  postgres:
+  qdrant:
